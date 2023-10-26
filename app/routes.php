@@ -101,7 +101,7 @@ return function (App $app) {
     $app->post('/hotel', function (Request $request, Response $response) {
         $parsedBody = $request->getParsedBody();
     
-        // Pastikan variabel sesuai dengan struktur tabel 'hotel'
+        // Pastikan variabel sesuai dengan struktur prosedur 'CreateHotelBaru'
         $nama_hotel = $parsedBody["nama_hotel"];
         $alamat = $parsedBody["alamat"];
         $kota = $parsedBody["kota"];
@@ -109,14 +109,18 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('INSERT INTO hotel (nama_hotel, alamat, kota) values (?, ?, ?)');
-            $query->execute([$nama_hotel, $alamat, $kota]);
+            // Panggil prosedur tersimpan 'CreateHotelBaru' dengan parameter yang sesuai
+            $query = $db->prepare('CALL CreateHotelBaru(?, ?, ?)');
+            $query->bindParam(1, $nama_hotel, PDO::PARAM_STR);
+            $query->bindParam(2, $alamat, PDO::PARAM_STR);
+            $query->bindParam(3, $kota, PDO::PARAM_STR);
+            $query->execute();
     
-            $lastId = $db->lastInsertId();
+            // Anda mungkin perlu menambahkan logika tambahan jika perlu mengambil hasil dari prosedur.
     
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Hotel disimpan dengan id ' . $lastId
+                    'message' => 'Hotel disimpan'
                 ]
             ));
     
@@ -133,10 +137,12 @@ return function (App $app) {
         }
     });
     
+    
 
     $app->post('/kamar', function (Request $request, Response $response) {
         $parsedBody = $request->getParsedBody();
     
+        // Pastikan variabel sesuai dengan struktur prosedur 'CreateKamarBaru'
         $idHotel = $parsedBody["id_hotel"];
         $nomorKamar = $parsedBody["nomor_kamar"];
         $tipeKamar = $parsedBody["tipe_kamar"];
@@ -146,8 +152,16 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('INSERT INTO kamar (id_hotel, nomor_kamar, tipe_kamar, hargapermalam, ketersediaan_kamar) values (?, ?, ?, ?, ?)');
-            $query->execute([$idHotel, $nomorKamar, $tipeKamar, $harga, $ketersediaan]);
+            // Panggil prosedur tersimpan 'CreateKamarBaru' dengan parameter yang sesuai
+            $query = $db->prepare('CALL CreateKamarBaru(?, ?, ?, ?, ?)');
+            $query->bindParam(1, $idHotel, PDO::PARAM_INT);
+            $query->bindParam(2, $nomorKamar, PDO::PARAM_STR);
+            $query->bindParam(3, $tipeKamar, PDO::PARAM_STR);
+            $query->bindParam(4, $harga, PDO::PARAM_STR);
+            $query->bindParam(5, $ketersediaan, PDO::PARAM_STR);
+            $query->execute();
+    
+            // Anda mungkin perlu menambahkan logika tambahan jika perlu mengambil hasil dari prosedur.
     
             $lastId = $db->lastInsertId();
     
@@ -163,25 +177,26 @@ return function (App $app) {
             $response = $response->withStatus(500);
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Terjadi kesalahan dalam menyimpan data: ' . $e->getMessage()
+                    'message' => 'Terjadi kesalahan dalam menyimpan data kamar: ' . $e->getMessage()
                 ]
             ));
             return $response;
         }
     });
+    
 
     $app->post('/pelanggan', function (Request $request, Response $response) {
         $parsedBody = $request->getParsedBody();
     
-        $nama_pelanggan = $parsedBody["nama_pelanggan"];
+        $namaPelanggan = $parsedBody["nama_pelanggan"];
         $email = $parsedBody["email"];
         $telepon = $parsedBody["telepon"];
     
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('INSERT INTO pelanggan (nama_pelanggan, email, telepon) values (?, ?, ?)');
-            $query->execute([$nama_pelanggan, $email, $telepon]);
+            $query = $db->prepare('CALL CreatePelangganBaru(?, ?, ?)');
+            $query->execute([$namaPelanggan, $email, $telepon]);
     
             $lastId = $db->lastInsertId();
     
@@ -204,6 +219,7 @@ return function (App $app) {
         }
     });
     
+    
 
     $app->post('/reservasi', function (Request $request, Response $response) {
         $parsedBody = $request->getParsedBody();
@@ -217,7 +233,7 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('INSERT INTO reservasi (id_pelanggan, id_kamar, tanggal_masuk, tanggal_keluar, jumlah_orang) values (?, ?, ?, ?, ?)');
+            $query = $db->prepare('CALL CreateReservasiBaru(?, ?, ?, ?, ?)');
             $query->execute([$id_pelanggan, $id_kamar, $tanggal_masuk, $tanggal_keluar, $jumlah_orang]);
     
             $lastId = $db->lastInsertId();
@@ -240,6 +256,7 @@ return function (App $app) {
             return $response;
         }
     });
+    
     
 
     // put data
