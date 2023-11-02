@@ -261,25 +261,25 @@ return function (App $app) {
 
     // put data
     $app->put('/hotel/{id}', function (Request $request, Response $response, $args) {
-        $parsedBody = $request->getParsedBody();
-    
         $currentId = $args['id'];
-        $nama_hotel = $parsedBody["nama_hotel"]; // Sesuaikan dengan kolom yang benar
-        $alamat = $parsedBody["alamat"]; // Sesuaikan dengan kolom yang benar
-        $kota = $parsedBody["kota"]; // Sesuaikan dengan kolom yang benar
-    
+        
+        $parsedBody = $request->getParsedBody();
+        $nama_hotel = $parsedBody["nama_hotel"];
+        $alamat = $parsedBody["alamat"];
+        $kota = $parsedBody["kota"];
+        
         $db = $this->get(PDO::class);
-    
+        
         try {
-            $query = $db->prepare('UPDATE hotel SET nama_hotel = ?, alamat = ?, kota = ? WHERE id = ?'); // Sesuaikan dengan tabel yang benar
-            $query->execute([$nama_hotel, $alamat, $kota, $currentId]);
-    
+            $query = $db->prepare('CALL UpdateHotel(?, ?, ?, ?)');
+            $query->execute([$currentId, $nama_hotel, $alamat, $kota]);
+        
             $response->getBody()->write(json_encode(
                 [
                     'message' => 'Hotel dengan id ' . $currentId . ' telah diperbarui'
                 ]
             ));
-    
+        
             return $response->withHeader("Content-Type", "application/json");
         } catch (PDOException $e) {
             // Tangani pengecualian database
@@ -293,10 +293,9 @@ return function (App $app) {
         }
     });
     
-
+    
     $app->put('/kamar/{id}', function (Request $request, Response $response, $args) {
         $parsedBody = $request->getParsedBody();
-    
         $currentId = $args['id'];
         $id_hotel = $parsedBody["id_hotel"]; // Sesuaikan dengan kolom yang benar
         $nomor_kamar = $parsedBody["nomor_kamar"]; // Sesuaikan dengan kolom yang benar
@@ -307,8 +306,8 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('UPDATE kamar SET id_hotel = ?, nomor_kamar = ?, tipe_kamar = ?, hargapermalam = ?, ketersediaan_kamar = ? WHERE id = ?'); // Sesuaikan dengan tabel yang benar
-            $query->execute([$id_hotel, $nomor_kamar, $tipe_kamar, $hargapermalam, $ketersediaan_kamar, $currentId]);
+            $query = $db->prepare('CALL UpdateKamar(?, ?, ?, ?, ?)');
+            $query->execute([$currentId, $nomor_kamar, $tipe_kamar, $hargapermalam, $ketersediaan_kamar]);
     
             $response->getBody()->write(json_encode(
                 [
@@ -329,6 +328,7 @@ return function (App $app) {
         }
     });
     
+    
 
     $app->put('/pelanggan/{id}', function (Request $request, Response $response, $args) {
         $parsedBody = $request->getParsedBody();
@@ -341,8 +341,8 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('UPDATE pelanggan SET nama_pelanggan = ?, email = ?, telepon = ? WHERE id = ?'); // Sesuaikan dengan tabel yang benar
-            $query->execute([$nama_pelanggan, $email, $telepon, $currentId]);
+            $query = $db->prepare('CALL UpdatePelanggan(?, ?, ?, ?)'); // Sesuaikan dengan tabel yang benar
+            $query->execute([ $currentId, $nama_pelanggan, $email, $telepon]);
     
             $response->getBody()->write(json_encode(
                 [
@@ -377,8 +377,8 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('UPDATE reservasi SET id_pelanggan = ?, id_kamar = ?, tanggal_masuk = ?, tanggal_keluar = ?, jumlah_orang = ? WHERE id = ?'); // Sesuaikan dengan tabel yang benar
-            $query->execute([$id_pelanggan, $id_kamar, $tanggal_masuk, $tanggal_keluar, $jumlah_orang, $currentId]);
+            $query = $db->prepare('CALL UpdateReservasi(?, ?, ?, ?, ?, ?)'); // Sesuaikan dengan tabel yang benar
+            $query->execute([$currentId, $id_pelanggan, $id_kamar, $tanggal_masuk, $tanggal_keluar, $jumlah_orang]);
     
             $response->getBody()->write(json_encode(
                 [
@@ -406,7 +406,7 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('DELETE FROM hotel WHERE id = ?'); // Gantilah "hotel" dengan nama tabel yang benar
+            $query = $db->prepare('CALL DeleteHotel(?)'); // Gantilah "hotel" dengan nama tabel yang benar
             $query->execute([$currentId]);
     
             if ($query->rowCount() === 0) {
@@ -440,7 +440,7 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('DELETE FROM kamar WHERE id = ?'); // Gantilah "kamar" dengan nama tabel yang benar
+            $query = $db->prepare('CALL DeleteKamar(?)'); // Gantilah "kamar" dengan nama tabel yang benar
             $query->execute([$currentId]);
     
             if ($query->rowCount() === 0) {
@@ -474,7 +474,7 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('DELETE FROM pelanggan WHERE id = ?'); // Gantilah "pelanggan" dengan nama tabel yang benar
+            $query = $db->prepare('CALL DeletePelanggan(?)'); // Gantilah "pelanggan" dengan nama tabel yang benar
             $query->execute([$currentId]);
     
             if ($query->rowCount() === 0) {
@@ -508,7 +508,7 @@ return function (App $app) {
         $db = $this->get(PDO::class);
     
         try {
-            $query = $db->prepare('DELETE FROM reservasi WHERE id = ?'); // Gantilah "reservasi" dengan nama tabel yang benar
+            $query = $db->prepare('CALL DeleteReservasi(?)'); // Gantilah "reservasi" dengan nama tabel yang benar
             $query->execute([$currentId]);
     
             if ($query->rowCount() === 0) {
