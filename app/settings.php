@@ -24,8 +24,8 @@ return function (ContainerBuilder $containerBuilder) {
                 'db' => [
                     'host' => '127.0.0.1',
                     'dbname' => 'reservase_hotel',
-                    'user' => 'root',
-                    'password' => '',
+                    'user' => 'pemula',
+                    'password' => '1234',
                 ]
             ]);
         },
